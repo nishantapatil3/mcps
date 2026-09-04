@@ -10,6 +10,35 @@ import pytest
 import web_search_mcp.search as search_mod
 
 
+@pytest.fixture(autouse=True)
+def hermetic(request, monkeypatch):
+    """Keep offline tests off the real network and off DNS.
+
+    Two paths would otherwise escape the mock transport: the "auto" backend falls
+    back to curl_cffi (a separate network stack the mock never sees), and the SSRF
+    guard resolves hostnames for real. Both are exercised explicitly by the tests
+    that care, via `allow_curl` and by patching the guard directly.
+
+    Skipped for `network` tests, which are meant to exercise the real stack -
+    including the real guard and the curl fallback if it is installed.
+    """
+    if request.node.get_closest_marker("network"):
+        return
+    monkeypatch.setattr(search_mod, "curl_available", lambda: False)
+    monkeypatch.setattr(search_mod, "validate_public_url", lambda url: None)
+
+
+@pytest.fixture
+def allow_curl(monkeypatch) -> Callable[[Callable[..., tuple]], None]:
+    """Enable the curl backend with a stub standing in for curl_cffi."""
+
+    def install(handler: Callable[..., tuple]) -> None:
+        monkeypatch.setattr(search_mod, "curl_available", lambda: True)
+        monkeypatch.setattr(search_mod, "curl_request", handler)
+
+    return install
+
+
 @pytest.fixture
 def mock_http(monkeypatch) -> Callable[[Callable[[httpx.Request], httpx.Response]], None]:
     """Route all outbound HTTP in the search module through a mock transport.

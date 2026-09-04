@@ -25,12 +25,9 @@ class TestChallengeDetection:
         assert looks_like_challenge(_response(200, "please solve the CAPTCHA")) is True
 
     def test_normal_page_is_not_a_challenge(self):
-        assert looks_like_challenge(_response(200, "<li class='b_algo'>ok</li>")) is False
+        assert looks_like_challenge(_response(200, "<div class='result'>ok</div>")) is False
 
 
-BING_OK = """
-<li class="b_algo"><h2><a href="https://a.example">A</a></h2><p>snip</p></li>
-"""
 DDG_OK = """
 <div class="result"><a class="result__a" href="https://b.example">B</a>
 <a class="result__snippet">snip</a></div>
@@ -38,50 +35,38 @@ DDG_OK = """
 
 
 class TestFallback:
-    def test_falls_back_to_duckduckgo_when_bing_challenged(self, mock_http):
-        def handler(request: httpx.Request) -> httpx.Response:
-            if "bing.com" in str(request.url):
-                return httpx.Response(202, text="anomaly")
-            return httpx.Response(200, text=DDG_OK)
-
-        mock_http(handler)
+    def test_uses_duckduckgo_when_healthy(self, mock_http):
+        mock_http(lambda request: httpx.Response(200, text=DDG_OK))
         results, notes = search_mod.search("q", limit=5)
         assert [r.engine for r in results] == ["duckduckgo"]
-        assert any("bing" in n and "rate limited" in n for n in notes)
-
-    def test_uses_first_engine_when_healthy(self, mock_http):
-        mock_http(lambda request: httpx.Response(200, text=BING_OK))
-        results, notes = search_mod.search("q", limit=5)
-        assert results[0].engine == "bing"
         assert notes == []
 
-    def test_raises_when_all_engines_fail(self, mock_http):
+    def test_raises_when_the_engine_is_challenged(self, mock_http):
         mock_http(lambda request: httpx.Response(202, text="anomaly"))
         with pytest.raises(SearchError) as excinfo:
             search_mod.search("q")
-        assert "bing" in str(excinfo.value) and "duckduckgo" in str(excinfo.value)
+        assert "duckduckgo" in str(excinfo.value)
 
-    def test_survives_transport_error(self, mock_http):
+    def test_transport_error_is_reported(self, mock_http):
         def handler(request: httpx.Request) -> httpx.Response:
-            if "bing.com" in str(request.url):
-                raise httpx.ConnectError("boom", request=request)
-            return httpx.Response(200, text=DDG_OK)
+            raise httpx.ConnectError("boom", request=request)
 
         mock_http(handler)
-        results, notes = search_mod.search("q")
-        assert results[0].engine == "duckduckgo"
-        assert any("ConnectError" in n for n in notes)
+        with pytest.raises(SearchError) as excinfo:
+            search_mod.search("q")
+        assert "ConnectError" in str(excinfo.value)
 
     def test_http_error_status_is_noted(self, mock_http):
-        def handler(request: httpx.Request) -> httpx.Response:
-            if "bing.com" in str(request.url):
-                return httpx.Response(503, text="unavailable")
-            return httpx.Response(200, text=DDG_OK)
+        mock_http(lambda request: httpx.Response(503, text="unavailable"))
+        with pytest.raises(SearchError) as excinfo:
+            search_mod.search("q")
+        assert "503" in str(excinfo.value)
 
-        mock_http(handler)
-        results, notes = search_mod.search("q")
-        assert results[0].engine == "duckduckgo"
-        assert any("503" in n for n in notes)
+    def test_unparseable_body_is_noted(self, mock_http):
+        mock_http(lambda request: httpx.Response(200, text="<html><body>nothing</body></html>"))
+        with pytest.raises(SearchError) as excinfo:
+            search_mod.search("q")
+        assert "no results parsed" in str(excinfo.value)
 
 
 class TestValidation:
@@ -90,7 +75,7 @@ class TestValidation:
             search_mod.search("   ")
 
     def test_limit_is_clamped_without_error(self, mock_http):
-        mock_http(lambda request: httpx.Response(200, text=BING_OK))
+        mock_http(lambda request: httpx.Response(200, text=DDG_OK))
         results, _ = search_mod.search("q", limit=9999)
         assert len(results) <= 50
 
@@ -112,10 +97,10 @@ class TestToolContract:
         assert "error" in out
 
     def test_web_search_success_shape(self, mock_http):
-        mock_http(lambda request: httpx.Response(200, text=BING_OK))
+        mock_http(lambda request: httpx.Response(200, text=DDG_OK))
         out = web_search("q", limit=3)
         assert out["count"] == 1
-        assert out["engine"] == "bing"
+        assert out["engine"] == "duckduckgo"
         assert set(out["results"][0]) == {"title", "url", "snippet", "rank", "engine"}
 
     def test_fetch_page_tool_returns_error_dict(self):

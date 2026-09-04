@@ -6,12 +6,19 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Nishant Patil" }]
-keywords = ["mcp", "model-context-protocol", "web-search", "bing", "duckduckgo"]
+keywords = ["mcp", "model-context-protocol", "web-search", "duckduckgo"]
 dependencies = [
     "mcp>=2.0.0,<3.0.0",
     "httpx>=0.27",
     "selectolax>=0.3.21",
 ]
+
+[project.optional-dependencies]
+# Chrome TLS impersonation. Search engines and Cloudflare-fronted sites
+# increasingly block on TLS fingerprint rather than headers, which no amount of
+# header tuning fixes; curl_cffi is the fallback that gets through. Optional
+# because it ships compiled wheels and most fetches never need it.
+browser = ["curl_cffi>=0.7"]
 
 [project.scripts]
 web-search-mcp = "web_search_mcp.__main__:main"
@@ -33,3 +40,6 @@ packages = ["src/web_search_mcp"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["network: tests that require live network access"]
+# Live checks are opt-in (`pytest -m network`) so the default suite stays
+# deterministic and runnable offline.
+addopts = "-m 'not network'"

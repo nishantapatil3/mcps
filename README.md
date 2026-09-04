@@ -5,7 +5,7 @@ global installs, no Docker.
 
 | Server | Description |
 | --- | --- |
-| [`web-search-mcp`](./web-search-mcp) | Web search + page fetch over plain HTTP. No browser, no API key. |
+| [`web-search-mcp`](./web-search-mcp) | Web search + page fetch over plain HTTP. No browser, no API key. Optional Chrome TLS impersonation for bot-filtered sites; SSRF-guarded fetching. |
 
 ## Quick start
 
