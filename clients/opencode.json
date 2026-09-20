@@ -12,6 +12,17 @@
             ],
             "timeout": 30000
         },
+        "location-tools": {
+            "enabled": true,
+            "type": "local",
+            "command": [
+                "uvx",
+                "--from",
+                "git+https://github.com/nishantapatil3/mcps#subdirectory=location-tools",
+                "location-tools"
+            ],
+            "timeout": 30000
+        },
         "playwright": {
             "type": "local",
             "command": [
