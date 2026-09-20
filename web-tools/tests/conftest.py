@@ -7,7 +7,7 @@ from typing import Callable
 import httpx
 import pytest
 
-import web_search_mcp.search as search_mod
+import web_tools.search as search_mod
 
 
 @pytest.fixture(autouse=True)

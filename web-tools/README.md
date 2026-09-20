@@ -3,7 +3,7 @@
 Model Context Protocol servers, runnable directly from this repo with `uvx` — no
 cloning, no global installs, no Docker.
 
-## web-search-mcp
+## web-tools
 
 Web search and page fetching for any MCP client. Uses plain HTTP requests
 against public search endpoints, so there is **no browser, no chromedriver, and
@@ -35,13 +35,13 @@ When a page runs longer than the window, the result carries `total_length` and a
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "web-search": {
+    "web-tools": {
       "type": "local",
       "command": [
         "uvx",
         "--from",
-        "git+https://github.com/nishantapatil3/mcps#subdirectory=web-search-mcp",
-        "web-search-mcp"
+        "git+https://github.com/nishantapatil3/mcps#subdirectory=web-tools",
+        "web-tools"
       ],
       "enabled": true,
       "timeout": 30000
@@ -53,8 +53,8 @@ When a page runs longer than the window, the result carries `total_length` and a
 #### Claude Code
 
 ```bash
-claude mcp add web-search -- \
-  uvx --from 'git+https://github.com/nishantapatil3/mcps#subdirectory=web-search-mcp' web-search-mcp
+claude mcp add web-tools -- \
+  uvx --from 'git+https://github.com/nishantapatil3/mcps#subdirectory=web-tools' web-tools
 ```
 
 #### Claude Desktop / Cursor / Windsurf
@@ -64,12 +64,12 @@ claude mcp add web-search -- \
 ```json
 {
   "mcpServers": {
-    "web-search": {
+    "web-tools": {
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/nishantapatil3/mcps#subdirectory=web-search-mcp",
-        "web-search-mcp"
+        "git+https://github.com/nishantapatil3/mcps#subdirectory=web-tools",
+        "web-tools"
       ]
     }
   }
@@ -81,7 +81,7 @@ To install the optional Chrome TLS impersonation backend at the same time, add
 [Getting past bot filters](#getting-past-bot-filters).
 
 > Pin to a tag or commit for reproducibility, e.g.
-> `git+https://github.com/nishantapatil3/mcps@v0.1.0#subdirectory=web-search-mcp`.
+> `git+https://github.com/nishantapatil3/mcps@v0.1.0#subdirectory=web-tools`.
 > Tracking the default branch means a push changes what your client executes.
 
 ### How it works
@@ -121,8 +121,8 @@ performs a real Chrome TLS handshake:
 
 ```bash
 uvx --with 'curl_cffi>=0.7' \
-  --from 'git+https://github.com/nishantapatil3/mcps#subdirectory=web-search-mcp' \
-  web-search-mcp
+  --from 'git+https://github.com/nishantapatil3/mcps#subdirectory=web-tools' \
+  web-tools
 ```
 
 [curl_cffi]: https://github.com/lexiforest/curl_cffi
@@ -163,14 +163,14 @@ a region or a per-call fetch backend, but not disable the SSRF guard.
 
 | Flag | Env var | Default |
 | --- | --- | --- |
-| `--search-backend` | `WEB_SEARCH_BACKEND` | `auto` |
-| `--fetch-backend` | `WEB_SEARCH_FETCH_BACKEND` | `auto` |
-| `--safe-search` | `WEB_SEARCH_SAFE_SEARCH` | `moderate` |
-| `--region` | `WEB_SEARCH_REGION` | none |
-| `--allow-private-urls` | `WEB_SEARCH_ALLOW_PRIVATE_URLS` | off (guard on) |
-| `--ca-certs PATH` | `WEB_SEARCH_CA_CERTS` | system trust store |
-| `--no-ssl-verify` | `WEB_SEARCH_SSL_VERIFY=0` | verification on |
-| `--requests-per-minute` | `WEB_SEARCH_REQUESTS_PER_MINUTE` | `30` |
+| `--search-backend` | `WEB_TOOLS_SEARCH_BACKEND` | `auto` |
+| `--fetch-backend` | `WEB_TOOLS_FETCH_BACKEND` | `auto` |
+| `--safe-search` | `WEB_TOOLS_SAFE_SEARCH` | `moderate` |
+| `--region` | `WEB_TOOLS_REGION` | none |
+| `--allow-private-urls` | `WEB_TOOLS_ALLOW_PRIVATE_URLS` | off (guard on) |
+| `--ca-certs PATH` | `WEB_TOOLS_CA_CERTS` | system trust store |
+| `--no-ssl-verify` | `WEB_TOOLS_SSL_VERIFY=0` | verification on |
+| `--requests-per-minute` | `WEB_TOOLS_REQUESTS_PER_MINUTE` | `30` |
 
 `--ca-certs` matters behind a TLS-intercepting corporate proxy: httpx does not
 read `SSL_CERT_FILE`, so the bundle has to be handed to it explicitly. Prefer it
@@ -200,7 +200,7 @@ carries real consequences:
 ### Development
 
 ```bash
-cd web-search-mcp
+cd web-tools
 uv run --group dev pytest              # offline: parsing, fallback, backends, SSRF guard
 uv run --group dev pytest -m network   # live end-to-end checks
 

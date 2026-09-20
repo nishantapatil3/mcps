@@ -5,9 +5,9 @@ from __future__ import annotations
 import httpx
 import pytest
 
-import web_search_mcp.search as search_mod
-from web_search_mcp.search import SearchError, looks_like_challenge
-from web_search_mcp.server import fetch_page_tool, web_search
+import web_tools.search as search_mod
+from web_tools.search import SearchError, looks_like_challenge
+from web_tools.server import fetch_page_tool, web_search
 
 
 def _response(status: int, text: str) -> httpx.Response:

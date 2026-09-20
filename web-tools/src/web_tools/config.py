@@ -3,7 +3,7 @@
 Everything here is startup configuration rather than per-call input: an operator
 running the server behind a TLS-intercepting proxy or on a trusted internal host
 needs these knobs, but the model calling the tools must not be able to reach
-them. Each has a `WEB_SEARCH_*` env var and a matching CLI flag in `server.main`.
+them. Each has a `WEB_TOOLS_*` env var and a matching CLI flag in `server.main`.
 """
 
 from __future__ import annotations
@@ -54,18 +54,18 @@ def _env_backend(name: str, default: str) -> str:
 
 
 def _resolve_ssl_verify() -> bool | str:
-    """Resolve `verify=` from WEB_SEARCH_CA_CERTS / WEB_SEARCH_SSL_VERIFY.
+    """Resolve `verify=` from WEB_TOOLS_CA_CERTS / WEB_TOOLS_SSL_VERIFY.
 
     A CA bundle path is needed behind TLS-intercepting proxies with a private CA:
     httpx does not read SSL_CERT_FILE, so the bundle has to be handed to it.
     """
-    if os.getenv("WEB_SEARCH_SSL_VERIFY", "1").strip().lower() in ("0", "false", "no", "off"):
+    if os.getenv("WEB_TOOLS_SSL_VERIFY", "1").strip().lower() in ("0", "false", "no", "off"):
         return False
-    ca_certs = os.getenv("WEB_SEARCH_CA_CERTS", "").strip()
+    ca_certs = os.getenv("WEB_TOOLS_CA_CERTS", "").strip()
     if ca_certs:
         if not os.path.isfile(ca_certs):
             print(
-                f"Warning: WEB_SEARCH_CA_CERTS path '{ca_certs}' does not exist; "
+                f"Warning: WEB_TOOLS_CA_CERTS path '{ca_certs}' does not exist; "
                 "TLS requests will fail",
                 file=sys.stderr,
             )
@@ -74,32 +74,32 @@ def _resolve_ssl_verify() -> bool | str:
 
 
 def _resolve_safe_search() -> SafeSearch:
-    raw = os.getenv("WEB_SEARCH_SAFE_SEARCH", "MODERATE").strip().upper()
+    raw = os.getenv("WEB_TOOLS_SAFE_SEARCH", "MODERATE").strip().upper()
     try:
         return SafeSearch[raw]
     except KeyError:
-        print(f"Warning: invalid WEB_SEARCH_SAFE_SEARCH='{raw}', using MODERATE", file=sys.stderr)
+        print(f"Warning: invalid WEB_TOOLS_SAFE_SEARCH='{raw}', using MODERATE", file=sys.stderr)
         return SafeSearch.MODERATE
 
 
 def _resolve_rpm() -> int:
-    raw = os.getenv("WEB_SEARCH_REQUESTS_PER_MINUTE", "30").strip()
+    raw = os.getenv("WEB_TOOLS_REQUESTS_PER_MINUTE", "30").strip()
     try:
         return max(1, int(raw))
     except ValueError:
         print(
-            f"Warning: invalid WEB_SEARCH_REQUESTS_PER_MINUTE='{raw}', using 30", file=sys.stderr
+            f"Warning: invalid WEB_TOOLS_REQUESTS_PER_MINUTE='{raw}', using 30", file=sys.stderr
         )
         return 30
 
 
 def from_env() -> Settings:
     return Settings(
-        search_backend=_env_backend("WEB_SEARCH_BACKEND", "auto"),
-        fetch_backend=_env_backend("WEB_SEARCH_FETCH_BACKEND", "auto"),
+        search_backend=_env_backend("WEB_TOOLS_SEARCH_BACKEND", "auto"),
+        fetch_backend=_env_backend("WEB_TOOLS_FETCH_BACKEND", "auto"),
         safe_search=_resolve_safe_search(),
-        region=os.getenv("WEB_SEARCH_REGION", "").strip(),
-        allow_private_urls=_env_flag("WEB_SEARCH_ALLOW_PRIVATE_URLS"),
+        region=os.getenv("WEB_TOOLS_REGION", "").strip(),
+        allow_private_urls=_env_flag("WEB_TOOLS_ALLOW_PRIVATE_URLS"),
         ssl_verify=_resolve_ssl_verify(),
         requests_per_minute=_resolve_rpm(),
     )

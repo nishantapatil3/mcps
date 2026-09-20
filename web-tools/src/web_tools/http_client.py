@@ -7,7 +7,7 @@ thing that gets past fingerprint-based bot filters - DuckDuckGo now answers
 interstitial at HTTP 200. Neither trips `raise_for_status`, so both are detected
 by inspecting the response rather than the status alone.
 
-curl_cffi is an optional dependency (`web-search-mcp[browser]`); every path that
+curl_cffi is an optional dependency (`web-tools[browser]`); every path that
 needs it degrades to a readable message when it is absent.
 """
 
@@ -51,7 +51,7 @@ IMPERSONATE = "chrome131"
 CURL_MISSING_HINT = (
     "the 'curl' backend requires curl_cffi, which is not installed. Add the browser "
     "extra to the launch command: uvx --with 'curl_cffi>=0.7' --from <source> "
-    "web-search-mcp (or pip install 'web-search-mcp[browser]' from a checkout)"
+    "web-tools (or pip install 'web-tools[browser]' from a checkout)"
 )
 
 

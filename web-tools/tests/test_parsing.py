@@ -1,4 +1,4 @@
-from web_search_mcp.search import parse_duckduckgo, unwrap_duckduckgo_url
+from web_tools.search import parse_duckduckgo, unwrap_duckduckgo_url
 
 
 class TestUnwrapDuckDuckGo:

@@ -5,12 +5,12 @@ from __future__ import annotations
 import httpx
 import pytest
 
-import web_search_mcp.config as config
-import web_search_mcp.search as search_mod
-from web_search_mcp.config import SafeSearch, Settings
-from web_search_mcp.http_client import CurlUnavailable, RateLimiter, curl_request
-from web_search_mcp.search import is_block
-from web_search_mcp.server import fetch_page_tool, web_search
+import web_tools.config as config
+import web_tools.search as search_mod
+from web_tools.config import SafeSearch, Settings
+from web_tools.http_client import CurlUnavailable, RateLimiter, curl_request
+from web_tools.search import is_block
+from web_tools.server import fetch_page_tool, web_search
 
 DDG_OK = """
 <div class="result"><a class="result__a" href="https://b.example">B</a>

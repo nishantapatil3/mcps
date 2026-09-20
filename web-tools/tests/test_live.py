@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-import web_search_mcp.search as search_mod
+import web_tools.search as search_mod
 
 pytestmark = pytest.mark.network
 

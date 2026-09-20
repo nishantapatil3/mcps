@@ -10,11 +10,11 @@ import socket
 
 import pytest
 
-import web_search_mcp.config as config
-import web_search_mcp.search as search_mod
-import web_search_mcp.ssrf as ssrf
-from web_search_mcp.server import fetch_page_tool
-from web_search_mcp.ssrf import BlockedURLError, validate_public_url
+import web_tools.config as config
+import web_tools.search as search_mod
+import web_tools.ssrf as ssrf
+from web_tools.server import fetch_page_tool
+from web_tools.ssrf import BlockedURLError, validate_public_url
 
 
 @pytest.fixture

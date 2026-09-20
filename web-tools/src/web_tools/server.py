@@ -14,7 +14,7 @@ from .http_client import CurlUnavailable, curl_available
 from .search import SearchError, fetch_page, search
 from .ssrf import BlockedURLError
 
-server = MCPServer(name="web-search-mcp", version=__version__)
+server = MCPServer(name="web-tools", version=__version__)
 
 # Both tools return text lifted verbatim from pages we do not control, so the
 # model has to be told where the trust boundary is before it reads any of it.
@@ -114,7 +114,7 @@ def fetch_page_tool(
             "error": (
                 f"refusing to fetch: {exc}. This server blocks private and internal "
                 "addresses to prevent SSRF. For a trusted local deployment, start it "
-                "with --allow-private-urls or WEB_SEARCH_ALLOW_PRIVATE_URLS=1."
+                "with --allow-private-urls or WEB_TOOLS_ALLOW_PRIVATE_URLS=1."
             ),
         }
     except (ValueError, CurlUnavailable) as exc:
@@ -125,7 +125,7 @@ def fetch_page_tool(
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="web-search-mcp",
+        prog="web-tools",
         description="MCP server providing keyless web search and page fetching.",
     )
     parser.add_argument(
@@ -134,7 +134,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=(
             "HTTP backend for web_search. 'auto' (default) tries httpx and falls back "
             "to curl_cffi Chrome TLS impersonation when an engine returns a block. "
-            "Also settable via WEB_SEARCH_BACKEND."
+            "Also settable via WEB_TOOLS_SEARCH_BACKEND."
         ),
     )
     parser.add_argument(
@@ -142,19 +142,19 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         choices=list(BACKENDS),
         help=(
             "Default HTTP backend for fetch_page. Also settable via "
-            "WEB_SEARCH_FETCH_BACKEND."
+            "WEB_TOOLS_FETCH_BACKEND."
         ),
     )
     parser.add_argument(
         "--safe-search",
         choices=[level.name.lower() for level in SafeSearch],
-        help="Default SafeSearch level. Also settable via WEB_SEARCH_SAFE_SEARCH.",
+        help="Default SafeSearch level. Also settable via WEB_TOOLS_SAFE_SEARCH.",
     )
     parser.add_argument(
         "--region",
         help=(
             "Default region/language code, e.g. 'us-en' or 'de-de'. Also settable via "
-            "WEB_SEARCH_REGION."
+            "WEB_TOOLS_REGION."
         ),
     )
     parser.add_argument(
@@ -164,7 +164,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=(
             "Allow fetch_page to reach loopback/private/link-local/metadata addresses. "
             "Off by default (SSRF guard); enable only for trusted local deployments. "
-            "Also settable via WEB_SEARCH_ALLOW_PRIVATE_URLS=1."
+            "Also settable via WEB_TOOLS_ALLOW_PRIVATE_URLS=1."
         ),
     )
     parser.add_argument(
@@ -173,7 +173,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=(
             "PEM CA bundle used to verify outbound TLS. Needed behind a "
             "TLS-intercepting proxy with a private CA, since httpx does not read "
-            "SSL_CERT_FILE. Also settable via WEB_SEARCH_CA_CERTS."
+            "SSL_CERT_FILE. Also settable via WEB_TOOLS_CA_CERTS."
         ),
     )
     parser.add_argument(
@@ -181,7 +181,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help=(
             "Disable outbound TLS certificate verification. Insecure; prefer "
-            "--ca-certs. Also settable via WEB_SEARCH_SSL_VERIFY=0."
+            "--ca-certs. Also settable via WEB_TOOLS_SSL_VERIFY=0."
         ),
     )
     parser.add_argument(
@@ -189,7 +189,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=int,
         help=(
             "Self-imposed rate limit per tool, default 30. Also settable via "
-            "WEB_SEARCH_REQUESTS_PER_MINUTE."
+            "WEB_TOOLS_REQUESTS_PER_MINUTE."
         ),
     )
     return parser.parse_args(argv)
@@ -214,7 +214,7 @@ def main(argv: list[str] | None = None) -> None:
         requests_per_minute=args.requests_per_minute,
     )
 
-    print(f"web-search-mcp {__version__} starting:", file=sys.stderr)
+    print(f"web-tools {__version__} starting:", file=sys.stderr)
     print(
         f"  backends: search={current.search_backend} fetch={current.fetch_backend} "
         f"(curl_cffi {'available' if curl_available() else 'not installed'})",

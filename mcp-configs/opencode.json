@@ -1,13 +1,13 @@
 {
     "$schema": "https://opencode.ai/config.json",
     "mcp": {
-        "web-search": {
+        "web-tools": {
             "type": "local",
             "command": [
                 "uvx",
                 "--from",
-                "git+https://github.com/nishantapatil3/mcps#subdirectory=web-search-mcp",
-                "web-search-mcp"
+                "git+https://github.com/nishantapatil3/mcps#subdirectory=web-tools",
+                "web-tools"
             ],
             "enabled": true,
             "timeout": 30000
